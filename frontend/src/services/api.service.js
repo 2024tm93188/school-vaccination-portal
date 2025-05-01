@@ -1,0 +1,80 @@
+import axios from "axios"
+
+// Create an axios instance with default config
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+})
+
+// Add a request interceptor to include auth token in requests
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error),
+)
+
+// Add a response interceptor to handle common errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Only redirect to login for 401 errors (unauthorized)
+    if (error.response && error.response.status === 401) {
+      // Don't redirect if we're already on the login page
+      if (window.location.pathname !== "/login") {
+        console.log("Unauthorized access, redirecting to login")
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        window.location.href = "/login"
+      }
+    }
+    return Promise.reject(error)
+  },
+)
+
+// Auth services
+export const authService = {
+  login: (username, password) => api.post("/api/auth/login", { username, password }),
+  register: (userData) => api.post("/api/auth/register", userData),
+}
+
+// Student services
+export const studentService = {
+  getAll: (params) => api.get("/api/students", { params }),
+  getById: (id) => api.get(`/api/students/${id}`),
+  create: (data) => api.post("/api/students", data),
+  update: (id, data) => api.put(`/api/students/${id}`, data),
+  delete: (id) => api.delete(`/api/students/${id}`),
+  import: (formData) =>
+    api.post("/api/students/import", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
+  vaccinate: (id, driveId) => api.post(`/api/students/${id}/vaccinate`, { driveId }),
+}
+
+// Vaccination drive services
+export const driveService = {
+  getAll: (params) => api.get("/api/drives", { params }),
+  getById: (id) => api.get(`/api/drives/${id}`),
+  create: (data) => api.post("/api/drives", data),
+  update: (id, data) => api.put(`/api/drives/${id}`, data),
+  cancel: (id) => api.patch(`/api/drives/${id}/cancel`),
+  complete: (id) => api.patch(`/api/drives/${id}/complete`),
+  getStudents: (id, params) => api.get(`/api/drives/${id}/students`, { params }),
+}
+
+// Dashboard and report services
+export const reportService = {
+  getDashboardStats: () => api.get("/api/dashboard"),
+  generateReport: (params) => api.get("/api/dashboard/report", { params }),
+}
+
+export default api
