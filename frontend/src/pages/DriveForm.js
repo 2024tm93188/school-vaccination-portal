@@ -1,8 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import { toast } from "react-toastify"
+import { FaArrowLeft, FaSave, FaTimes, FaCalendarAlt, FaSyringe } from "react-icons/fa"
+import { driveService } from "../services/api.service"
+import Spinner from "../components/Spinner"
 
 const DriveForm = () => {
   const { id } = useParams()
@@ -24,29 +27,30 @@ const DriveForm = () => {
 
   useEffect(() => {
     if (isEditMode) {
-      // Simulate API call to fetch drive data
-      setTimeout(() => {
-        // Mock data for editing
-        const mockDrive = {
-          id: Number.parseInt(id),
-          vaccineName: "Polio",
-          date: "2023-06-15",
-          availableDoses: 500,
-          applicableClasses: ["1", "2", "3"],
-          status: "Scheduled",
+      const fetchDrive = async () => {
+        try {
+          setLoading(true)
+          const response = await driveService.getById(id)
+          const { vaccineName, date, availableDoses, applicableClasses } = response.data
+
+          setDrive({
+            vaccineName,
+            date: new Date(date).toISOString().split("T")[0],
+            availableDoses: availableDoses.toString(),
+            applicableClasses,
+          })
+        } catch (err) {
+          toast.error("Failed to load drive data")
+          console.error(err)
+          navigate("/drives")
+        } finally {
+          setLoading(false)
         }
+      }
 
-        setDrive({
-          vaccineName: mockDrive.vaccineName,
-          date: mockDrive.date,
-          availableDoses: mockDrive.availableDoses.toString(),
-          applicableClasses: mockDrive.applicableClasses,
-        })
-
-        setLoading(false)
-      }, 1000)
+      fetchDrive()
     }
-  }, [id, isEditMode])
+  }, [id, isEditMode, navigate])
 
   const validateForm = () => {
     const newErrors = {}
@@ -137,13 +141,18 @@ const DriveForm = () => {
     try {
       setSubmitting(true)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (isEditMode) {
+        await driveService.update(id, drive)
+        toast.success("Vaccination drive updated successfully")
+      } else {
+        await driveService.create(drive)
+        toast.success("Vaccination drive scheduled successfully")
+      }
 
-      toast.success(isEditMode ? "Vaccination drive updated successfully" : "Vaccination drive scheduled successfully")
       navigate("/drives")
     } catch (err) {
-      toast.error("An error occurred")
+      const errorMessage = err.response?.data?.message || "An error occurred"
+      toast.error(errorMessage)
       console.error(err)
     } finally {
       setSubmitting(false)
@@ -151,81 +160,99 @@ const DriveForm = () => {
   }
 
   if (loading) {
-    return <div className="loading">Loading drive data...</div>
+    return <Spinner />
   }
 
   return (
     <div>
-      <h1 className="page-title">{isEditMode ? "Edit Vaccination Drive" : "Schedule New Vaccination Drive"}</h1>
+      <Link to="/drives" className="back-button">
+        <FaArrowLeft /> Back to Vaccination Drives
+      </Link>
 
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="form-container">
+        <h1 className="form-title">{isEditMode ? "Edit Vaccination Drive" : "Schedule New Vaccination Drive"}</h1>
+
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="vaccineName">Vaccine Name</label>
-            <input
-              type="text"
-              id="vaccineName"
-              name="vaccineName"
-              value={drive.vaccineName}
-              onChange={handleChange}
-              className={errors.vaccineName ? "input-error" : ""}
-              placeholder="Enter vaccine name"
-            />
-            {errors.vaccineName && <div className="error-message">{errors.vaccineName}</div>}
-          </div>
+          <div className="form-section">
+            <h2 className="form-section-title">Drive Information</h2>
+            <div className="form-grid">
+              <div className="form-group">
+                <label htmlFor="vaccineName">
+                  <FaSyringe className="mr-2" /> Vaccine Name
+                </label>
+                <input
+                  type="text"
+                  id="vaccineName"
+                  name="vaccineName"
+                  value={drive.vaccineName}
+                  onChange={handleChange}
+                  className={errors.vaccineName ? "input-error" : ""}
+                  placeholder="Enter vaccine name"
+                />
+                {errors.vaccineName && <div className="error-message">{errors.vaccineName}</div>}
+              </div>
 
-          <div className="form-group">
-            <label htmlFor="date">Date</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={drive.date}
-              onChange={handleChange}
-              className={errors.date ? "input-error" : ""}
-              min={(() => {
-                const minDate = new Date()
-                minDate.setDate(minDate.getDate() + 15) // 15 days in advance
-                return minDate.toISOString().split("T")[0]
-              })()}
-            />
-            {errors.date ? (
-              <div className="error-message">{errors.date}</div>
-            ) : (
-              <div className="help-text">Vaccination drives must be scheduled at least 15 days in advance</div>
-            )}
-          </div>
+              <div className="form-group">
+                <label htmlFor="date">
+                  <FaCalendarAlt className="mr-2" /> Scheduled Date
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={drive.date}
+                  onChange={handleChange}
+                  className={errors.date ? "input-error" : ""}
+                  min={(() => {
+                    const minDate = new Date()
+                    minDate.setDate(minDate.getDate() + 15) // 15 days in advance
+                    return minDate.toISOString().split("T")[0]
+                  })()}
+                />
+                {errors.date ? (
+                  <div className="error-message">{errors.date}</div>
+                ) : (
+                  <div className="helper-text">Vaccination drives must be scheduled at least 15 days in advance</div>
+                )}
+              </div>
 
-          <div className="form-group">
-            <label htmlFor="availableDoses">Available Doses</label>
-            <input
-              type="number"
-              id="availableDoses"
-              name="availableDoses"
-              value={drive.availableDoses}
-              onChange={handleChange}
-              className={errors.availableDoses ? "input-error" : ""}
-              min="1"
-              placeholder="Enter number of available doses"
-            />
-            {errors.availableDoses && <div className="error-message">{errors.availableDoses}</div>}
-          </div>
-
-          <div className="form-group">
-            <label>Applicable Classes</label>
-            <div className="class-selection">
-              {availableClasses.map((classValue) => (
-                <button
-                  key={classValue}
-                  type="button"
-                  onClick={() => handleClassToggle(classValue)}
-                  className={`class-button ${drive.applicableClasses.includes(classValue) ? "selected" : ""}`}
-                >
-                  Class {classValue}
-                </button>
-              ))}
+              <div className="form-group">
+                <label htmlFor="availableDoses">Available Doses</label>
+                <input
+                  type="number"
+                  id="availableDoses"
+                  name="availableDoses"
+                  value={drive.availableDoses}
+                  onChange={handleChange}
+                  className={errors.availableDoses ? "input-error" : ""}
+                  min="1"
+                  placeholder="Enter number of available doses"
+                />
+                {errors.availableDoses && <div className="error-message">{errors.availableDoses}</div>}
+              </div>
             </div>
-            {errors.applicableClasses && <div className="error-message">{errors.applicableClasses}</div>}
+          </div>
+
+          <div className="form-section">
+            <h2 className="form-section-title">Applicable Classes</h2>
+            <div className="class-selection-container">
+              <div className="class-selection">
+                {availableClasses.map((classValue) => (
+                  <button
+                    key={classValue}
+                    type="button"
+                    onClick={() => handleClassToggle(classValue)}
+                    className={`class-button ${drive.applicableClasses.includes(classValue) ? "selected" : ""}`}
+                  >
+                    Class {classValue}
+                  </button>
+                ))}
+              </div>
+              {errors.applicableClasses && <div className="error-message">{errors.applicableClasses}</div>}
+              <div className="class-selection-help">
+                Click on the classes that are eligible for this vaccination drive
+              </div>
+            </div>
           </div>
 
           <div className="form-actions">
@@ -235,10 +262,10 @@ const DriveForm = () => {
               className="btn btn-secondary"
               disabled={submitting}
             >
-              Cancel
+              <FaTimes className="mr-2" /> Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? "Saving..." : isEditMode ? "Update Drive" : "Schedule Drive"}
+              <FaSave className="mr-2" /> {submitting ? "Saving..." : isEditMode ? "Update Drive" : "Schedule Drive"}
             </button>
           </div>
         </form>

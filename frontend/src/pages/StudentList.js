@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { FaPlus, FaUpload, FaSearch, FaEdit, FaEye } from "react-icons/fa"
+import { FaPlus, FaUpload, FaSearch, FaEdit, FaEye, FaUserGraduate } from "react-icons/fa"
 import Spinner from "../components/Spinner"
 
 const StudentList = () => {
@@ -151,11 +151,20 @@ const StudentList = () => {
             </tbody>
           </table>
         ) : (
-          <div className="no-data">
-            <p>No students found matching your filters.</p>
-            <Link to="/students/add" className="btn btn-primary">
-              <FaPlus className="mr-2" /> Add Student
-            </Link>
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <FaUserGraduate size={48} />
+            </div>
+            <h3 className="empty-state-title">No Students Found</h3>
+            <p className="empty-state-message">No students match your current filters.</p>
+            <div className="empty-state-actions">
+              <Link to="/students/add" className="btn btn-primary">
+                <FaPlus className="mr-2" /> Add Student
+              </Link>
+              <Link to="/students/import" className="btn btn-secondary ml-3">
+                <FaUpload className="mr-2" /> Import Students
+              </Link>
+            </div>
           </div>
         )}
       </div>

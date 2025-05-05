@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
-import { FaUpload, FaDownload, FaInfoCircle } from "react-icons/fa"
+import { FaUpload, FaDownload, FaInfoCircle, FaArrowLeft } from "react-icons/fa"
 import { API_URL } from "../config"
 
 const StudentImport = () => {
@@ -74,54 +74,47 @@ const StudentImport = () => {
 
   return (
     <div>
+      <Link to="/students" className="back-button">
+        <FaArrowLeft /> Back to Students
+      </Link>
+
       <h1 className="text-2xl font-bold mb-6">Import Students</h1>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex items-start space-x-4 p-4 bg-blue-50 border border-blue-200 rounded-md mb-6">
-          <FaInfoCircle className="text-blue-500 mt-1 flex-shrink-0" />
-          <div>
-            <h3 className="font-medium text-blue-800">Import Instructions</h3>
-            <ul className="mt-2 text-sm text-blue-700 list-disc list-inside">
-              <li>Upload a CSV file with student data</li>
-              <li>The CSV must include headers: name, studentId, class, section, age, gender</li>
-              <li>Student IDs must be unique</li>
-              <li>Download the template below for the correct format</li>
-            </ul>
-            <button
-              onClick={downloadTemplate}
-              className="mt-3 inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <FaDownload className="mr-1.5" />
-              Download Template
-            </button>
+      <div className="form-container">
+        <div className="info-box mb-6">
+          <div className="flex items-start space-x-4">
+            <FaInfoCircle className="text-blue-500 mt-1 flex-shrink-0" size={20} />
+            <div>
+              <h3 className="font-medium text-blue-800">Import Instructions</h3>
+              <ul className="mt-2 text-sm text-blue-700 list-disc list-inside">
+                <li>Upload a CSV file with student data</li>
+                <li>The CSV must include headers: name, studentId, class, section, age, gender</li>
+                <li>Student IDs must be unique</li>
+                <li>Download the template below for the correct format</li>
+              </ul>
+              <button
+                onClick={downloadTemplate}
+                className="mt-3 inline-flex items-center px-3 py-1.5 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <FaDownload className="mr-1.5" size={12} />
+                Download Template
+              </button>
+            </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">CSV File</label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-              <div className="space-y-1 text-center">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 48 48"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="flex text-sm text-gray-600">
-                  <label
-                    htmlFor="file-upload"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                  >
-                    <span>Upload a file</span>
+          <div className="form-section">
+            <h2 className="form-section-title">Upload CSV File</h2>
+            <div className="file-upload-container">
+              <div className="file-upload-area">
+                <div className="file-upload-icon">
+                  <FaUpload size={32} className="text-gray-400" />
+                </div>
+                <div className="file-upload-text">
+                  <p className="text-sm font-medium text-gray-700">Drag and drop your CSV file here, or</p>
+                  <label htmlFor="file-upload" className="file-upload-button">
+                    Browse Files
                     <input
                       id="file-upload"
                       name="file-upload"
@@ -131,27 +124,33 @@ const StudentImport = () => {
                       onChange={handleFileChange}
                     />
                   </label>
-                  <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs text-gray-500">CSV up to 10MB</p>
+                <p className="text-xs text-gray-500 mt-2">CSV up to 10MB</p>
               </div>
+              {file && (
+                <div className="selected-file">
+                  <div className="selected-file-name">
+                    <FaInfoCircle className="text-blue-500 mr-2" />
+                    <span>{file.name}</span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {(file.size / 1024).toFixed(2)} KB • Selected {new Date().toLocaleTimeString()}
+                  </p>
+                </div>
+              )}
             </div>
-            {file && <p className="mt-2 text-sm text-gray-500">Selected file: {file.name}</p>}
           </div>
 
-          <div className="flex justify-end space-x-3">
+          <div className="form-actions">
             <button
               type="button"
               onClick={() => navigate("/students")}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="btn btn-secondary"
+              disabled={uploading}
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={!file || uploading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" disabled={!file || uploading} className="btn btn-primary">
               {uploading ? (
                 <>
                   <svg
@@ -189,37 +188,31 @@ const StudentImport = () => {
 
       {/* Import Results */}
       {importResults && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium mb-4">Import Results</h2>
+        <div className="form-container mt-6">
+          <h2 className="form-title">Import Results</h2>
 
           <div className="mb-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-green-700">{importResults.message}</p>
+            <div className="success-message">
+              <p>{importResults.message}</p>
             </div>
           </div>
 
           {importResults.errors && importResults.errors.length > 0 && (
-            <div>
-              <h3 className="font-medium text-red-800 mb-2">Errors</h3>
-              <div className="border border-red-200 rounded-md overflow-hidden">
-                <table className="min-w-full divide-y divide-red-200">
-                  <thead className="bg-red-50">
+            <div className="form-section">
+              <h3 className="form-section-title text-red-600">Errors</h3>
+              <div className="table-container">
+                <table className="data-table error-table">
+                  <thead>
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">
-                        Row
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-red-500 uppercase tracking-wider">
-                        Error
-                      </th>
+                      <th>Row</th>
+                      <th>Error</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-red-200">
+                  <tbody>
                     {importResults.errors.map((error, index) => (
                       <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {JSON.stringify(error.row)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-500">{error.error}</td>
+                        <td className="text-sm text-gray-500 max-w-xs truncate">{JSON.stringify(error.row)}</td>
+                        <td className="text-sm text-red-500">{error.error}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -228,11 +221,8 @@ const StudentImport = () => {
             </div>
           )}
 
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={() => navigate("/students")}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
+          <div className="form-actions">
+            <button onClick={() => navigate("/students")} className="btn btn-primary">
               Go to Students List
             </button>
           </div>

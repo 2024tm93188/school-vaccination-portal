@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { FaPlus, FaCalendarAlt, FaEye, FaEdit } from "react-icons/fa"
+import { FaPlus, FaCalendarAlt, FaEye, FaEdit, FaSyringe } from "react-icons/fa"
 import Spinner from "../components/Spinner"
 
 const VaccinationDrives = () => {
@@ -163,11 +163,11 @@ const VaccinationDrives = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <Link to={`/drives/${drive.id}`} className="btn btn-sm btn-info">
+                      <Link to={`/drives/${drive.id}`} className="btn btn-sm btn-info" title="View Details">
                         <FaEye />
                       </Link>
                       {drive.status === "Scheduled" && (
-                        <Link to={`/drives/edit/${drive.id}`} className="btn btn-sm btn-edit">
+                        <Link to={`/drives/edit/${drive.id}`} className="btn btn-sm btn-edit" title="Edit Drive">
                           <FaEdit />
                         </Link>
                       )}
@@ -178,11 +178,17 @@ const VaccinationDrives = () => {
             </tbody>
           </table>
         ) : (
-          <div className="no-data">
-            <p>No vaccination drives found matching your filters.</p>
-            <Link to="/drives/add" className="btn btn-primary">
-              <FaPlus className="mr-2" /> Schedule New Drive
-            </Link>
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <FaSyringe size={48} />
+            </div>
+            <h3 className="empty-state-title">No Vaccination Drives Found</h3>
+            <p className="empty-state-message">No vaccination drives match your current filters.</p>
+            <div className="empty-state-actions">
+              <Link to="/drives/add" className="btn btn-primary">
+                <FaPlus className="mr-2" /> Schedule New Drive
+              </Link>
+            </div>
           </div>
         )}
       </div>
