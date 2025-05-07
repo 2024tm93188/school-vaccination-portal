@@ -24,6 +24,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error("API Error:", error.response || error)
+
     // Only redirect to login for 401 errors (unauthorized)
     if (error.response && error.response.status === 401) {
       // Don't redirect if we're already on the login page
@@ -64,7 +66,10 @@ export const studentService = {
 export const driveService = {
   getAll: (params) => api.get("/api/drives", { params }),
   getById: (id) => api.get(`/api/drives/${id}`),
-  create: (data) => api.post("/api/drives", data),
+  create: (data) => {
+    console.log("Creating drive with data:", data)
+    return api.post("/api/drives", data)
+  },
   update: (id, data) => api.put(`/api/drives/${id}`, data),
   cancel: (id) => api.patch(`/api/drives/${id}/cancel`),
   complete: (id) => api.patch(`/api/drives/${id}/complete`),

@@ -43,22 +43,22 @@ const VaccinationDrives = () => {
       } catch (error) {
         console.error("Error fetching vaccination drives:", error)
         // Silently fall back to default data
-        console.log("Using default drive data")
+        // console.log("Using default drive data")
 
-        // Filter the default data based on filters
-        const filteredDefaultDrives = defaultDrives.filter((drive) => {
-          // Filter by status
-          const matchesStatus = filter.status ? drive.status === filter.status : true
+        // // Filter the default data based on filters
+        // const filteredDefaultDrives = defaultDrives.filter((drive) => {
+        //   // Filter by status
+        //   const matchesStatus = filter.status ? drive.status === filter.status : true
 
-          // Filter by upcoming
-          const matchesUpcoming = filter.upcoming
-            ? new Date(drive.date) > new Date() && drive.status === "Scheduled"
-            : true
+        //   // Filter by upcoming
+        //   const matchesUpcoming = filter.upcoming
+        //     ? new Date(drive.date) > new Date() && drive.status === "Scheduled"
+        //     : true
 
-          return matchesStatus && matchesUpcoming
-        })
+        //   return matchesStatus && matchesUpcoming
+        // })
 
-        setDrives(filteredDefaultDrives)
+        // setDrives(filteredDefaultDrives)
       } finally {
         setLoading(false)
       }

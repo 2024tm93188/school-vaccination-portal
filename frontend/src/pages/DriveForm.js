@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import { driveService } from "../services/api.service"
+import Spinner from "../components/Spinner"
 
 const DriveForm = () => {
   const { id } = useParams()
@@ -17,8 +18,6 @@ const DriveForm = () => {
     date: "",
     availableDoses: "",
     applicableClasses: [],
-    status: '',
-    createdBy: 'sunitha',
   })
   const [errors, setErrors] = useState({})
 
@@ -30,10 +29,9 @@ const DriveForm = () => {
       const fetchDrive = async () => {
         try {
           setLoading(true)
+          const response = await driveService.getById(id)
 
-          // Try to fetch from API
-          try {
-            const response = await driveService.getById(id)
+          if (response && response.data) {
             const { vaccineName, date, availableDoses, applicableClasses } = response.data
 
             setDrive({
@@ -42,19 +40,10 @@ const DriveForm = () => {
               availableDoses: availableDoses.toString(),
               applicableClasses,
             })
-          } catch (apiError) {
-            console.error("API error:", apiError)
-            // If API fails, use mock data for demo purposes
-            setDrive({
-              vaccineName: "Polio",
-              date: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 20 days from now
-              availableDoses: "500",
-              applicableClasses: ["1", "2", "3"],
-            })
           }
         } catch (err) {
-          toast.error("Failed to load drive data")
-          console.error(err)
+          console.error("Error fetching drive:", err)
+          toast.error("Failed to load vaccination drive data")
           navigate("/drives")
         } finally {
           setLoading(false)
@@ -62,6 +51,15 @@ const DriveForm = () => {
       }
 
       fetchDrive()
+    } else {
+      // Set default date to 15 days from now for new drives
+      const defaultDate = new Date()
+      defaultDate.setDate(defaultDate.getDate() + 15)
+
+      setDrive((prev) => ({
+        ...prev,
+        date: defaultDate.toISOString().split("T")[0],
+      }))
     }
   }, [id, isEditMode, navigate])
 
@@ -73,13 +71,16 @@ const DriveForm = () => {
     if (!drive.date) {
       newErrors.date = "Date is required"
     } else {
-      // Check if date is at least 15 days in the future
-      const selectedDate = new Date(drive.date)
-      const minDate = new Date()
-      minDate.setDate(minDate.getDate() + 15)
+      // Check if date is at least 15 days in the future for new drives
+      // For edit mode, we'll be more lenient
+      if (!isEditMode) {
+        const selectedDate = new Date(drive.date)
+        const minDate = new Date()
+        minDate.setDate(minDate.getDate() + 15)
 
-      if (selectedDate < minDate) {
-        newErrors.date = "Vaccination drive must be scheduled at least 15 days in advance"
+        if (selectedDate < minDate) {
+          newErrors.date = "Vaccination drive must be scheduled at least 15 days in advance"
+        }
       }
     }
 
@@ -160,38 +161,29 @@ const DriveForm = () => {
         availableDoses: Number(drive.availableDoses),
       }
 
+      console.log("Submitting drive data:", driveData)
+
       if (isEditMode) {
-        try {
-          await driveService.update(id, driveData)
-          toast.success("Vaccination drive updated successfully")
-        } catch (apiError) {
-          console.error("API error:", apiError)
-          // For demo purposes, show success even if API fails
-          toast.error("Failed to update Vaccination drive")
-        }
+        await driveService.update(id, driveData)
+        toast.success("Vaccination drive updated successfully")
       } else {
-        try {
-          await driveService.create(driveData)
-          toast.success("Vaccination drive scheduled successfully")
-        } catch (apiError) {
-          console.error("API error:", apiError)
-          // For demo purposes, show success even if API fails
-          toast.error("Failed to create Vaccination drive")
-        }
+        const response = await driveService.create(driveData)
+        console.log("Drive created successfully:", response.data)
+        toast.success("Vaccination drive scheduled successfully")
       }
 
       navigate("/drives")
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "An error occurred"
+      console.error("Error saving drive:", err)
+      const errorMessage = err.response?.data?.message || "An error occurred while saving the vaccination drive"
       toast.error(errorMessage)
-      console.error(err)
     } finally {
       setSubmitting(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading drive data...</div>
+    return <Spinner />
   }
 
   return (
@@ -234,11 +226,6 @@ const DriveForm = () => {
                   value={drive.date}
                   onChange={handleChange}
                   className={errors.date ? "input-error" : ""}
-                  min={(() => {
-                    const minDate = new Date()
-                    minDate.setDate(minDate.getDate() + 15) // 15 days in advance
-                    return minDate.toISOString().split("T")[0]
-                  })()}
                 />
                 {errors.date ? (
                   <div className="error-message">{errors.date}</div>

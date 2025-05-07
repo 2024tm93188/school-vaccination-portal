@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose")
 
 const vaccinationDriveSchema = new mongoose.Schema(
   {
@@ -24,19 +24,20 @@ const vaccinationDriveSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
-      enum: ['Scheduled', 'Completed', 'Cancelled'],
-      default: 'Scheduled',
+      enum: ["Scheduled", "Completed", "Cancelled"],
+      default: "Scheduled",
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
+      required: false, // Making this optional for now
     },
   },
   {
     timestamps: true,
-  }
-);
+  },
+)
 
-const VaccinationDrive = mongoose.model('VaccinationDrive', vaccinationDriveSchema);
+const VaccinationDrive = mongoose.model("VaccinationDrive", vaccinationDriveSchema)
 
-module.exports = VaccinationDrive;
+module.exports = VaccinationDrive
