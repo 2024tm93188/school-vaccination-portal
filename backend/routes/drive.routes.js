@@ -3,25 +3,180 @@ const driveController = require('../controllers/drive.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const router = express.Router();
 
-// Get all vaccination drives with optional filters
-router.get('/', authMiddleware, driveController.getAllDrives);
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     VaccinationDrive:
+ *       type: object
+ *       required:
+ *         - vaccineName
+ *         - date
+ *         - availableDoses
+ *         - applicableClasses
+ *       properties:
+ *         vaccineName:
+ *           type: string
+ *         date:
+ *           type: string
+ *           format: date
+ *         availableDoses:
+ *           type: integer
+ *           minimum: 1
+ *         applicableClasses:
+ *           type: array
+ *           items:
+ *             type: string
+ *         status:
+ *           type: string
+ *           enum: [Scheduled, Completed, Cancelled]
+ *         createdBy:
+ *           type: string
+ *           description: ObjectId of the user who created the drive
+ */
 
-// Get vaccination drive by ID
-router.get('/:id', authMiddleware, driveController.getDriveById);
+/**
+ * @swagger
+ * tags:
+ *   name: Vaccination Drives
+ *   description: Managing vaccination drives
+ */
 
-// Create new vaccination drive
-router.post('/', authMiddleware, driveController.createDrive);
+/**
+ * @swagger
+ * /drives:
+ *   get:
+ *     summary: Get all vaccination drives
+ *     tags: [Vaccination Drives]
+ *     responses:
+ *       200:
+ *         description: List of vaccination drives
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/VaccinationDrive'
+ */
+router.get('/', driveController.getAllDrives);
 
-// Update vaccination drive
-router.put('/:id', authMiddleware, driveController.updateDrive);
+/**
+ * @swagger
+ * /drives/{id}:
+ *   get:
+ *     summary: Get a vaccination drive by ID
+ *     tags: [Vaccination Drives]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vaccination drive details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VaccinationDrive'
+ */
+router.get('/:id', driveController.getDriveById);
 
-// Cancel vaccination drive
-router.patch('/:id/cancel', authMiddleware, driveController.cancelDrive);
+/**
+ * @swagger
+ * /drives:
+ *   post:
+ *     summary: Create a new vaccination drive
+ *     tags: [Vaccination Drives]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/VaccinationDrive'
+ *     responses:
+ *       201:
+ *         description: Vaccination drive created
+ */
+router.post('/', driveController.createDrive);
 
-// Mark vaccination drive as completed
-router.patch('/:id/complete', authMiddleware, driveController.completeDrive);
+/**
+ * @swagger
+ * /drives/{id}:
+ *   put:
+ *     summary: Update a vaccination drive
+ *     tags: [Vaccination Drives]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/VaccinationDrive'
+ *     responses:
+ *       200:
+ *         description: Vaccination drive updated
+ */
+router.put('/:id', driveController.updateDrive);
 
-// Get students for a specific drive
-router.get('/:id/students', authMiddleware, driveController.getDriveStudents);
+/**
+ * @swagger
+ * /drives/{id}/cancel:
+ *   patch:
+ *     summary: Cancel a vaccination drive
+ *     tags: [Vaccination Drives]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vaccination drive cancelled
+ */
+router.patch('/:id/cancel', driveController.cancelDrive);
+
+/**
+ * @swagger
+ * /drives/{id}/complete:
+ *   patch:
+ *     summary: Mark a vaccination drive as completed
+ *     tags: [Vaccination Drives]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vaccination drive marked as completed
+ */
+router.patch('/:id/complete', driveController.completeDrive);
+
+/**
+ * @swagger
+ * /drives/{id}/students:
+ *   get:
+ *     summary: Get students for a specific vaccination drive
+ *     tags: [Vaccination Drives]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Vaccination drive ID
+ *     responses:
+ *       200:
+ *         description: List of students for the drive
+ */
+router.get('/:id/students', driveController.getDriveStudents);
 
 module.exports = router;

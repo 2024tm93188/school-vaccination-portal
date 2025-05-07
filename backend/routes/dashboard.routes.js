@@ -5,9 +5,9 @@ const authMiddleware = require('../middlewares/auth.middleware');
 const router = express.Router();
 
 // Get dashboard statistics
-router.get('/', authMiddleware, dashboardController.getDashboardStats);
+router.get('/', dashboardController.getDashboardStats);
 
 // Generate vaccination report
-router.get('/report', authMiddleware, dashboardController.generateReport);
+router.get('/report', dashboardController.generateReport);
 
 module.exports = router;

@@ -2,37 +2,40 @@
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { reportService } from "../services/api.service"
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalStudents: 0,
     vaccinatedStudents: 0,
     vaccinationRate: 0,
-    upcomingDrives: [],
-  })
+    upcomingDrives: []  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate API call to fetch dashboard data
-    setTimeout(() => {
-      setStats({
-        totalStudents: 1250,
-        vaccinatedStudents: 875,
-        vaccinationRate: 70,
-        upcomingDrives: [
-          { id: 1, vaccineName: "Polio", date: "2023-06-15", availableDoses: 500, applicableClasses: ["1", "2", "3"] },
-          { id: 2, vaccineName: "MMR", date: "2023-06-22", availableDoses: 300, applicableClasses: ["4", "5", "6"] },
-          {
-            id: 3,
-            vaccineName: "Hepatitis B",
-            date: "2023-07-05",
-            availableDoses: 400,
-            applicableClasses: ["7", "8", "9"],
-          },
-        ],
-      })
-      setLoading(false)
-    }, 1000)
+    // Fetch dashboard data from API
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true)
+        const response = await reportService.getDashboardStats()
+
+        // If API call is successful, update the stats
+        if (response && response.data) {
+          setStats({
+            ...stats, // Keep default values as fallback
+            ...response.data, // Override with API data
+          })
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error)
+        // Don't show error toast to user, just use the default data
+        console.log("Using default dashboard data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
   }, [])
 
   if (loading) {
@@ -96,13 +99,13 @@ const Dashboard = () => {
             </thead>
             <tbody>
               {stats.upcomingDrives.map((drive) => (
-                <tr key={drive.id}>
+                <tr key={drive.id || drive._id}>
                   <td>{drive.vaccineName}</td>
                   <td>{new Date(drive.date).toLocaleDateString()}</td>
                   <td>{drive.availableDoses}</td>
                   <td>{drive.applicableClasses.join(", ")}</td>
                   <td>
-                    <Link to={`/drives/${drive.id}`} className="btn btn-sm btn-info">
+                    <Link to={`/drives/${drive.id || drive._id}`} className="btn btn-sm btn-info">
                       View Details
                     </Link>
                   </td>

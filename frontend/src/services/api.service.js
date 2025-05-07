@@ -74,6 +74,7 @@ export const driveService = {
 // Dashboard and report services
 export const reportService = {
   getDashboardStats: () => api.get("/api/dashboard"),
+  getClassStats: () => api.get("/api/dashboard/class-stats"),
   generateReport: (params) => api.get("/api/dashboard/report", { params }),
 }
 
