@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { toast } from "react-toastify"
 import { studentService } from "../services/api.service"
+import DeleteConfirmationModal from "../components/DeleteConfirmationModel"
 
 const StudentList = () => {
   // Default hardcoded students as fallback
@@ -24,6 +26,8 @@ const StudentList = () => {
     class: "",
     vaccinationStatus: "",
   })
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [studentToDelete, setStudentToDelete] = useState(null)
 
   useEffect(() => {
     // Fetch students from API
@@ -105,6 +109,33 @@ const StudentList = () => {
     }))
   }
 
+  const handleDeleteClick = (student) => {
+    setStudentToDelete(student)
+    setShowDeleteModal(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!studentToDelete) return
+
+    try {
+      await studentService.delete(studentToDelete.id)
+      toast.success("Student deleted successfully")
+
+      // Remove the deleted student from the list
+      setStudents(students.filter((student) => student.id !== studentToDelete.id))
+      setShowDeleteModal(false)
+      setStudentToDelete(null)
+    } catch (error) {
+      console.error("Error deleting student:", error)
+      toast.error("Failed to delete student")
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false)
+    setStudentToDelete(null)
+  }
+
   if (loading) {
     return <div className="loading">Loading students...</div>
   }
@@ -179,12 +210,19 @@ const StudentList = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <Link to={`/students/${student.id}`} className="btn btn-sm btn-info">
+                      <Link to={`/students/${student.id}`} className="btn btn-sm btn-info" title="View Details">
                         <i className="fas fa-eye"></i>
                       </Link>
-                      <Link to={`/students/${student.id}/edit`} className="btn btn-sm btn-edit">
+                      <Link to={`/students/${student.id}/edit`} className="btn btn-sm btn-edit" title="Edit Student">
                         <i className="fas fa-edit"></i>
                       </Link>
+                      <button
+                        onClick={() => handleDeleteClick(student)}
+                        className="btn btn-sm btn-danger"
+                        title="Delete Student"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -200,6 +238,16 @@ const StudentList = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          title="Delete Student"
+          message={`Are you sure you want to delete ${studentToDelete?.name}? This action cannot be undone.`}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
+      )}
     </div>
   )
 }

@@ -71,6 +71,7 @@ export const driveService = {
     return api.post("/api/drives", data)
   },
   update: (id, data) => api.put(`/api/drives/${id}`, data),
+  delete: (id) => api.delete(`/api/drives/${id}`),
   cancel: (id) => api.patch(`/api/drives/${id}/cancel`),
   complete: (id) => api.patch(`/api/drives/${id}/complete`),
   getStudents: (id, params) => api.get(`/api/drives/${id}/students`, { params }),

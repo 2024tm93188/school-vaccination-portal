@@ -2,19 +2,22 @@
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { toast } from "react-toastify"
 import { driveService } from "../services/api.service"
+import Spinner from "../components/Spinner"
+import DeleteConfirmationModal from "../components/DeleteConfirmationModel"
 
 const VaccinationDrives = () => {
-  // Default hardcoded drives as fallback
   const [drives, setDrives] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState({
     status: "",
     upcoming: false,
   })
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [driveToDelete, setDriveToDelete] = useState(null)
 
   useEffect(() => {
-    // Fetch vaccination drives from API
     const fetchDrives = async () => {
       try {
         setLoading(true)
@@ -26,39 +29,15 @@ const VaccinationDrives = () => {
         const response = await driveService.getAll(params)
 
         if (response && response.data && response.data.drives) {
-          // Map API response to match the expected format
-          const mappedDrives = response.data.drives.map((drive) => ({
-            id: drive._id,
-            vaccineName: drive.vaccineName,
-            date: drive.date,
-            availableDoses: drive.availableDoses,
-            applicableClasses: drive.applicableClasses,
-            status: drive.status,
-            // Keep the original data for reference
-            _original: drive,
-          }))
-
-          setDrives(mappedDrives)
+          setDrives(response.data.drives)
+        } else {
+          // Fallback to empty array if no drives found
+          setDrives([])
         }
       } catch (error) {
         console.error("Error fetching vaccination drives:", error)
-        // Silently fall back to default data
-        // console.log("Using default drive data")
-
-        // // Filter the default data based on filters
-        // const filteredDefaultDrives = defaultDrives.filter((drive) => {
-        //   // Filter by status
-        //   const matchesStatus = filter.status ? drive.status === filter.status : true
-
-        //   // Filter by upcoming
-        //   const matchesUpcoming = filter.upcoming
-        //     ? new Date(drive.date) > new Date() && drive.status === "Scheduled"
-        //     : true
-
-        //   return matchesStatus && matchesUpcoming
-        // })
-
-        // setDrives(filteredDefaultDrives)
+        toast.error("Failed to load vaccination drives")
+        setDrives([])
       } finally {
         setLoading(false)
       }
@@ -82,6 +61,33 @@ const VaccinationDrives = () => {
     }))
   }
 
+  const handleDeleteClick = (drive) => {
+    setDriveToDelete(drive)
+    setShowDeleteModal(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!driveToDelete) return
+
+    try {
+      await driveService.delete(driveToDelete._id)
+      toast.success("Vaccination drive deleted successfully")
+
+      // Remove the deleted drive from the list
+      setDrives(drives.filter((drive) => drive._id !== driveToDelete._id))
+      setShowDeleteModal(false)
+      setDriveToDelete(null)
+    } catch (error) {
+      console.error("Error deleting vaccination drive:", error)
+      toast.error("Failed to delete vaccination drive")
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false)
+    setDriveToDelete(null)
+  }
+
   const getDriveStatusClass = (status) => {
     switch (status) {
       case "Scheduled":
@@ -96,7 +102,7 @@ const VaccinationDrives = () => {
   }
 
   if (loading) {
-    return <div className="loading">Loading vaccination drives...</div>
+    return <Spinner />
   }
 
   return (
@@ -146,7 +152,7 @@ const VaccinationDrives = () => {
             </thead>
             <tbody>
               {drives.map((drive) => (
-                <tr key={drive.id}>
+                <tr key={drive._id}>
                   <td>{drive.vaccineName}</td>
                   <td>{new Date(drive.date).toLocaleDateString()}</td>
                   <td>{drive.availableDoses}</td>
@@ -156,14 +162,21 @@ const VaccinationDrives = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <Link to={`/drives/${drive.id}`} className="btn btn-sm btn-info">
+                      <Link to={`/drives/${drive._id}`} className="btn btn-sm btn-info" title="View Details">
                         <i className="fas fa-eye"></i>
                       </Link>
                       {drive.status === "Scheduled" && (
-                        <Link to={`/drives/edit/${drive.id}`} className="btn btn-sm btn-edit">
+                        <Link to={`/drives/edit/${drive._id}`} className="btn btn-sm btn-edit" title="Edit Drive">
                           <i className="fas fa-edit"></i>
                         </Link>
                       )}
+                      <button
+                        onClick={() => handleDeleteClick(drive)}
+                        className="btn btn-sm btn-danger"
+                        title="Delete Drive"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -179,6 +192,16 @@ const VaccinationDrives = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          title="Delete Vaccination Drive"
+          message={`Are you sure you want to delete the ${driveToDelete?.vaccineName} drive scheduled for ${new Date(driveToDelete?.date).toLocaleDateString()}? This action cannot be undone.`}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
+      )}
     </div>
   )
 }

@@ -94,6 +94,7 @@ const StudentDetails = () => {
 
   // Check if student has any vaccinations
   const hasVaccinations = student.vaccinations && student.vaccinations.length > 0
+  const isVaccinated = hasVaccinations && student.vaccinations.some((v) => v.status === "Completed")
 
   return (
     <div>
@@ -150,6 +151,15 @@ const StudentDetails = () => {
                 <div className="detail-item-label">Section</div>
                 <div className="detail-item-value">{student.section}</div>
               </div>
+
+              <div className="detail-item">
+                <div className="detail-item-label">Vaccination Status</div>
+                <div className="detail-item-value">
+                  <span className={`status-badge ${isVaccinated ? "vaccinated" : "not-vaccinated"}`}>
+                    {isVaccinated ? "Vaccinated" : "Not Vaccinated"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -185,12 +195,12 @@ const StudentDetails = () => {
                       </td>
                       <td>
                         <span
-                          className={`detail-badge ${
+                          className={`status-badge ${
                             vaccination.status === "Completed"
-                              ? "detail-badge-green"
+                              ? "vaccinated"
                               : vaccination.status === "Missed"
-                                ? "detail-badge-red"
-                                : "detail-badge-yellow"
+                                ? "not-vaccinated"
+                                : ""
                           }`}
                         >
                           {vaccination.status}
