@@ -1,5 +1,5 @@
-// swagger.js
-const swaggerJsdoc = require('swagger-jsdoc');
+// backend/swagger.js
+const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
 const options = {
@@ -10,18 +10,14 @@ const options = {
       version: '1.0.0',
       description: 'API documentation for the School Vaccination Portal',
     },
-    servers: [
-      {
-        url: 'http://localhost:5000/api',
-      },
-    ],
   },
-  apis: ['./routes/*.js'], // Path to the API docs
+  apis: ['./routes/*.js'], // Adjust this path if your routes are elsewhere
 };
 
-const specs = swaggerJsdoc(options);
+const swaggerSpec = swaggerJSDoc(options);
 
-module.exports = {
-  swaggerUi,
-  specs,
-};
+function setupSwagger(app) {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
+
+module.exports = setupSwagger;

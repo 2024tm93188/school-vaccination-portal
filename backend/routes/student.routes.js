@@ -1,56 +1,6 @@
 const express = require('express');
 const studentController = require('../controllers/student.controller');
-const authMiddleware = require('../middlewares/auth.middleware');
-const upload = require('../middlewares/upload.middleware');
 const router = express.Router();
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Vaccination:
- *       type: object
- *       properties:
- *         drive:
- *           type: string
- *           description: ObjectId of the vaccination drive
- *         vaccineName:
- *           type: string
- *         dateAdministered:
- *           type: string
- *           format: date
- *         status:
- *           type: string
- *           enum: [Scheduled, Completed, Missed]
-
- *     Student:
- *       type: object
- *       required:
- *         - name
- *         - studentId
- *         - class
- *         - section
- *         - age
- *         - gender
- *       properties:
- *         name:
- *           type: string
- *         studentId:
- *           type: string
- *         class:
- *           type: string
- *         section:
- *           type: string
- *         age:
- *           type: integer
- *         gender:
- *           type: string
- *           enum: [Male, Female, Other]
- *         vaccinations:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Vaccination'
- */
 
 /**
  * @swagger
@@ -63,17 +13,11 @@ const router = express.Router();
  * @swagger
  * /students:
  *   get:
- *     summary: Get all students
+ *     summary: Retrieve a list of students
  *     tags: [Students]
  *     responses:
  *       200:
- *         description: List of students
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Student'
+ *         description: A list of students
  */
 router.get('/', studentController.getAllStudents);
 
@@ -87,16 +31,14 @@ router.get('/', studentController.getAllStudents);
  *       - in: path
  *         name: id
  *         required: true
+ *         description: Student ID
  *         schema:
  *           type: string
- *         description: Student ID
  *     responses:
  *       200:
- *         description: Student data
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Student'
+ *         description: Student details
+ *       404:
+ *         description: Student not found
  */
 router.get('/:id', studentController.getStudentById);
 
@@ -111,10 +53,20 @@ router.get('/:id', studentController.getStudentById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Student'
+ *             type: object
+ *             required:
+ *               - name
+ *               - class
+ *             properties:
+ *               name:
+ *                 type: string
+ *               class:
+ *                 type: string
  *     responses:
  *       201:
- *         description: Student created
+ *         description: Student created successfully
+ *       400:
+ *         description: Bad request
  */
 router.post('/', studentController.createStudent);
 
@@ -128,18 +80,27 @@ router.post('/', studentController.createStudent);
  *       - in: path
  *         name: id
  *         required: true
+ *         description: Student ID
  *         schema:
  *           type: string
- *         description: Student ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Student'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               class:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Student updated
+ *         description: Student updated successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Student not found
  */
 router.put('/:id', studentController.updateStudent);
 
@@ -153,68 +114,15 @@ router.put('/:id', studentController.updateStudent);
  *       - in: path
  *         name: id
  *         required: true
+ *         description: Student ID
  *         schema:
  *           type: string
- *         description: Student ID
  *     responses:
- *       204:
- *         description: Student deleted
+ *       200:
+ *         description: Student deleted successfully
+ *       404:
+ *         description: Student not found
  */
 router.delete('/:id', studentController.deleteStudent);
-
-/**
- * @swagger
- * /students/import:
- *   post:
- *     summary: Bulk import students via CSV
- *     tags: [Students]
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               file:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Students imported successfully
- */
-router.post('/import', upload.single('file'), studentController.importStudents);
-
-/**
- * @swagger
- * /students/{id}/vaccinate:
- *   post:
- *     summary: Mark student as vaccinated
- *     tags: [Students]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Student ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               drive:
- *                 type: string
- *               vaccineName:
- *                 type: string
- *               dateAdministered:
- *                 type: string
- *                 format: date
- *     responses:
- *       200:
- *         description: Vaccination recorded
- */
-router.post('/:id/vaccinate', studentController.vaccinateStudent);
 
 module.exports = router;

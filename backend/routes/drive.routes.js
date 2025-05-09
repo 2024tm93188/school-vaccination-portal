@@ -5,6 +5,13 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   - name: Vaccination Drives
+ *     description: Managing vaccination drives
+ */
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     VaccinationDrive:
@@ -37,14 +44,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Vaccination Drives
- *   description: Managing vaccination drives
- */
-
-/**
- * @swagger
- * /drives:
+ * /api/drives:
  *   get:
  *     summary: Get all vaccination drives
  *     tags: [Vaccination Drives]
@@ -62,13 +62,13 @@ router.get('/', driveController.getAllDrives);
 
 /**
  * @swagger
- * /drives/{id}:
+ * /api/drives/{id}:
  *   get:
  *     summary: Get a vaccination drive by ID
  *     tags: [Vaccination Drives]
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
  *         schema:
  *           type: string
@@ -84,7 +84,7 @@ router.get('/:id', driveController.getDriveById);
 
 /**
  * @swagger
- * /drives:
+ * /api/drives:
  *   post:
  *     summary: Create a new vaccination drive
  *     tags: [Vaccination Drives]
@@ -102,13 +102,13 @@ router.post('/', driveController.createDrive);
 
 /**
  * @swagger
- * /drives/{id}:
+ * /api/drives/{id}:
  *   put:
  *     summary: Update a vaccination drive
  *     tags: [Vaccination Drives]
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
  *         schema:
  *           type: string
@@ -126,13 +126,13 @@ router.put('/:id', driveController.updateDrive);
 
 /**
  * @swagger
- * /drives/{id}/cancel:
+ * /api/drives/{id}/cancel:
  *   patch:
  *     summary: Cancel a vaccination drive
  *     tags: [Vaccination Drives]
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
  *         schema:
  *           type: string
@@ -144,13 +144,13 @@ router.patch('/:id/cancel', driveController.cancelDrive);
 
 /**
  * @swagger
- * /drives/{id}/complete:
+ * /api/drives/{id}/complete:
  *   patch:
  *     summary: Mark a vaccination drive as completed
  *     tags: [Vaccination Drives]
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
  *         schema:
  *           type: string
@@ -162,17 +162,17 @@ router.patch('/:id/complete', driveController.completeDrive);
 
 /**
  * @swagger
- * /drives/{id}/students:
+ * /api/drives/{id}/students:
  *   get:
  *     summary: Get students for a specific vaccination drive
  *     tags: [Vaccination Drives]
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
+ *         description: Vaccination drive ID
  *         schema:
  *           type: string
- *         description: Vaccination drive ID
  *     responses:
  *       200:
  *         description: List of students for the drive
