@@ -126,6 +126,30 @@ router.put('/:id', driveController.updateDrive);
 
 /**
  * @swagger
+ * /api/drives/{id}:
+ *   delete:
+ *     summary: Delete a vaccination drive
+ *     tags: [Vaccination Drives]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/VaccinationDrive'
+ *     responses:
+ *       200:
+ *         description: Vaccination drive deleted
+ */
+router.delete("/:id", driveController.deleteDrive)
+
+/**
+ * @swagger
  * /api/drives/{id}/cancel:
  *   patch:
  *     summary: Cancel a vaccination drive

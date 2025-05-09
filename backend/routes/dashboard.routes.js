@@ -11,7 +11,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /dashboard/statistics:
+ * /dashboard:
  *   get:
  *     summary: Get dashboard statistics
  *     tags: [Dashboard]

@@ -134,6 +134,52 @@ exports.updateDrive = async (req, res) => {
   }
 }
 
+// Delete a vaccination drive
+exports.deleteDrive = async (req, res) => {
+    try {
+      const drive = await VaccinationDrive.findById(req.params.id)
+  
+      if (!drive) {
+        return res.status(404).json({ success: false, message: "Vaccination drive not found" })
+      }
+  
+      // Check if the drive is in the past
+      const today = new Date()
+      const driveDate = new Date(drive.driveDate)
+  
+      if (driveDate < today) {
+        return res.status(400).json({
+          success: false,
+          message: "Cannot delete past vaccination drives",
+        })
+      }
+  
+      // Check if any students are already vaccinated in this drive
+      const studentsVaccinated = await Student.countDocuments({
+        "vaccinations.vaccineId": drive._id,
+      })
+  
+      if (studentsVaccinated > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot delete drive as ${studentsVaccinated} students are already vaccinated`,
+        })
+      }
+  
+      await VaccinationDrive.findByIdAndDelete(req.params.id)
+  
+      res.json({ success: true, message: "Vaccination drive deleted successfully" })
+    } catch (error) {
+      console.error("Error deleting vaccination drive:", error)
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete vaccination drive",
+        error: error.message,
+      })
+    }
+  }
+  
+
 // Cancel vaccination drive
 exports.cancelDrive = async (req, res) => {
   try {
