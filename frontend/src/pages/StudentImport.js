@@ -1,76 +1,70 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
-import axios from "axios"
-import { toast } from "react-toastify"
-import { FaUpload, FaDownload, FaInfoCircle, FaArrowLeft } from "react-icons/fa"
-import { API_URL } from "../config"
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { FaUpload, FaDownload, FaInfoCircle, FaArrowLeft } from "react-icons/fa";
+import { studentService } from "../services/api.service";
 
 const StudentImport = () => {
-  const navigate = useNavigate()
-  const [file, setFile] = useState(null)
-  const [uploading, setUploading] = useState(false)
-  const [importResults, setImportResults] = useState(null)
+  const navigate = useNavigate();
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [importResults, setImportResults] = useState(null);
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0]
+    const selectedFile = e.target.files[0];
 
     if (selectedFile && selectedFile.type !== "text/csv") {
-      toast.error("Please select a CSV file")
-      return
+      toast.error("Please select a CSV file");
+      return;
     }
 
-    setFile(selectedFile)
-  }
+    setFile(selectedFile);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!file) {
-      toast.error("Please select a CSV file")
-      return
+      toast.error("Please select a CSV file");
+      return;
     }
 
     try {
-      setUploading(true)
+      setUploading(true);
 
-      const formData = new FormData()
-      formData.append("file", file)
+      const formData = new FormData();
+      formData.append("file", file);
 
-      const res = await axios.post(`${API_URL}/api/students/import`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-
-      setImportResults(res.data)
-      toast.success(res.data.message)
+      const res = await studentService.import(formData);
+      setImportResults(res.data);
+      toast.success(res.data.message);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "An error occurred during import"
-      toast.error(errorMessage)
-      console.error(err)
+      const errorMessage = err.response?.data?.message || "An error occurred during import";
+      toast.error(errorMessage);
+      console.error(err);
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   const downloadTemplate = () => {
     // Create CSV content
     const csvContent =
-      "name,studentId,class,section,age,gender\nJohn Doe,STU001,5,A,10,Male\nJane Smith,STU002,7,B,12,Female"
+      "name,studentId,class,section,age,gender\nJohn Doe,STU001,5,A,10,Male\nJane Smith,STU002,7,B,12,Female";
 
     // Create a blob and download link
-    const blob = new Blob([csvContent], { type: "text/csv" })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.setAttribute("hidden", "")
-    a.setAttribute("href", url)
-    a.setAttribute("download", "student_import_template.csv")
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-  }
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("hidden", "");
+    a.setAttribute("href", url);
+    a.setAttribute("download", "student_import_template.csv");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   return (
     <div>
@@ -229,7 +223,7 @@ const StudentImport = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default StudentImport
+export default StudentImport;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
+import { reportService } from "../services/api.service"
 
 const Reports = () => {
   const [loading, setLoading] = useState(false)
@@ -14,14 +15,48 @@ const Reports = () => {
   })
   const [errors, setErrors] = useState({})
   const [vaccines, setVaccines] = useState([])
+  const [stats, setStats] = useState({
+    totalReports: 0,
+    totalVaccines: 0,
+    dateRange: "All time",
+  })
+  const [isFiltered, setIsFiltered] = useState(false)
 
   useEffect(() => {
     // Fetch available vaccines for filter dropdown
-    // This will be replaced with an actual API call
-    setTimeout(() => {
-      setVaccines(["Polio", "MMR", "Hepatitis B", "Tetanus", "Influenza"])
-    }, 500)
+    fetchVaccines()
   }, [])
+
+  const fetchVaccines = async () => {
+    try {
+      setLoading(true)
+      const availableVaccinesResponse = await reportService.getAvailableVaccines()
+
+      if (availableVaccinesResponse && availableVaccinesResponse.data) {
+        setVaccines(availableVaccinesResponse.data)
+        setStats((prev) => ({
+          ...prev,
+          totalVaccines: availableVaccinesResponse.data.length,
+        }))
+      } else {
+        setVaccines([])
+        setStats((prev) => ({
+          ...prev,
+          totalVaccines: 0,
+        }))
+      }
+    } catch (error) {
+      console.error("Error fetching vaccines:", error)
+      toast.error("Failed to load vaccine data")
+      setVaccines([])
+      setStats((prev) => ({
+        ...prev,
+        totalVaccines: 0,
+      }))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const validateForm = () => {
     const newErrors = {}
@@ -57,88 +92,98 @@ const Reports = () => {
     e.preventDefault()
 
     if (validateForm()) {
-      generateReport()
+      generateReport(false) // Don't download CSV automatically
     } else {
       toast.error("Please fix the errors in the form")
     }
   }
 
-  const generateReport = () => {
+  const handleGenerateAndDownload = (e) => {
+    e.preventDefault()
+
+    if (validateForm()) {
+      generateReport(true) // Download CSV automatically
+    } else {
+      toast.error("Please fix the errors in the form")
+    }
+  }
+
+  const clearFilters = () => {
+    setFilter({
+      vaccineName: "",
+      fromDate: "",
+      toDate: "",
+      class: "",
+    })
+    setErrors({})
+    setIsFiltered(false)
+
+    // If there was a previous report, clear it
+    if (report.length > 0) {
+      setReport([])
+      setStats((prev) => ({
+        ...prev,
+        totalReports: 0,
+        dateRange: "All time",
+      }))
+      toast.info("Filters cleared")
+    }
+  }
+
+  const generateReport = async (downloadAfterGeneration = false) => {
     setLoading(true)
 
-    // This will be replaced with an actual API call
-    setTimeout(() => {
-      const mockReport = [
-        {
-          id: 1,
-          name: "John Doe",
-          studentId: "STU001",
-          class: "5",
-          section: "A",
-          vaccineName: "Polio",
-          dateAdministered: "2023-05-15",
-        },
-        {
-          id: 2,
-          name: "Emily Brown",
-          studentId: "STU004",
-          class: "6",
-          section: "B",
-          vaccineName: "MMR",
-          dateAdministered: "2023-05-18",
-        },
-        {
-          id: 3,
-          name: "Sarah Taylor",
-          studentId: "STU006",
-          class: "7",
-          section: "B",
-          vaccineName: "Hepatitis B",
-          dateAdministered: "2023-05-20",
-        },
-        {
-          id: 4,
-          name: "Olivia Thomas",
-          studentId: "STU008",
-          class: "8",
-          section: "B",
-          vaccineName: "Tetanus",
-          dateAdministered: "2023-05-10",
-        },
-      ]
+    try {
+      // Check if any filter is applied
+      const hasFilters = Object.values(filter).some((value) => value !== "")
+      setIsFiltered(hasFilters)
 
-      // Apply filters
-      const filteredReport = mockReport.filter((record) => {
-        const matchesVaccine = filter.vaccineName ? record.vaccineName === filter.vaccineName : true
-        const matchesClass = filter.class ? record.class === filter.class : true
+      // Fetch from API
+      const params = {
+        vaccineName: filter.vaccineName || undefined,
+        fromDate: filter.fromDate || undefined,
+        toDate: filter.toDate || undefined,
+        class: filter.class || undefined,
+      }
 
-        let matchesDateRange = true
-        if (filter.fromDate || filter.toDate) {
-          const recordDate = new Date(record.dateAdministered)
+      const response = await reportService.generateReport(params)
 
-          if (filter.fromDate) {
-            const fromDate = new Date(filter.fromDate)
-            if (recordDate < fromDate) matchesDateRange = false
-          }
+      if (response && response.data) {
+        setReport(response.data)
+        setStats((prev) => ({
+          ...prev,
+          totalReports: response.data.length,
+          dateRange:
+            filter.fromDate && filter.toDate
+              ? `${new Date(filter.fromDate).toLocaleDateString()} - ${new Date(filter.toDate).toLocaleDateString()}`
+              : filter.fromDate
+                ? `From ${new Date(filter.fromDate).toLocaleDateString()}`
+                : filter.toDate
+                  ? `Until ${new Date(filter.toDate).toLocaleDateString()}`
+                  : "All time",
+        }))
 
-          if (filter.toDate) {
-            const toDate = new Date(filter.toDate)
-            if (recordDate > toDate) matchesDateRange = false
+        if (response.data.length === 0) {
+          toast.info("No records found matching your criteria")
+        } else {
+          toast.success(`Generated report with ${response.data.length} records`)
+
+          // Download CSV if requested
+          if (downloadAfterGeneration) {
+            downloadCSV()
           }
         }
-
-        return matchesVaccine && matchesClass && matchesDateRange
-      })
-
-      setReport(filteredReport)
-      setLoading(false)
-
-      if (filteredReport.length === 0) {
-        toast.info("No records found matching your criteria")
       } else {
-        toast.success(`Generated report with ${filteredReport.length} records`)
+        setReport([])
+        toast.info("No records found")
       }
-    }, 1000)
+    } catch (error) {
+      console.error("Error generating report:", error)
+      toast.error("Failed to generate report")
+      setReport([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const downloadCSV = () => {
@@ -162,7 +207,7 @@ const Reports = () => {
     const a = document.createElement("a")
     a.setAttribute("hidden", "")
     a.setAttribute("href", url)
-    a.setAttribute("download", "vaccination_report.csv")
+    a.setAttribute("download", `vaccination_report_${new Date().toISOString().split("T")[0]}.csv`)
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -170,9 +215,56 @@ const Reports = () => {
     toast.success("Report downloaded successfully")
   }
 
+  // Helper function to display active filters
+  const getActiveFiltersText = () => {
+    const activeFilters = []
+
+    if (filter.vaccineName) activeFilters.push(`Vaccine: ${filter.vaccineName}`)
+    if (filter.class) activeFilters.push(`Class: ${filter.class}`)
+    if (filter.fromDate) activeFilters.push(`From: ${new Date(filter.fromDate).toLocaleDateString()}`)
+    if (filter.toDate) activeFilters.push(`To: ${new Date(filter.toDate).toLocaleDateString()}`)
+
+    return activeFilters.length > 0 ? activeFilters.join(" | ") : "None"
+  }
+
   return (
     <div>
       <h2 className="page-title">Vaccination Reports</h2>
+
+      {/* Quick Stats Cards */}
+      <div className="stats-container mb-4">
+        <div className="stat-card">
+          <div className="stat-icon students-icon">
+            <i className="fas fa-file-alt"></i>
+          </div>
+          <div className="stat-details">
+            <h3>Report Records</h3>
+            <p className="stat-value">{stats.totalReports}</p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon vaccinated-icon">
+            <i className="fas fa-syringe"></i>
+          </div>
+          <div className="stat-details">
+            <h3>Vaccines Available</h3>
+            <p className="stat-value">{stats.totalVaccines}</p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon rate-icon">
+            <i className="fas fa-calendar-alt"></i>
+          </div>
+          <div className="stat-details">
+            <h3>Date Range</h3>
+            <p className="stat-value" style={{ fontSize: "0.9rem" }}>
+              {stats.dateRange}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="filters-container">
         <form onSubmit={handleSubmit} className="report-form">
@@ -199,9 +291,10 @@ const Reports = () => {
               <input
                 type="date"
                 name="fromDate"
+                class="date-input"
                 value={filter.fromDate}
                 onChange={handleFilterChange}
-                className={`form-control ${errors.dateRange ? "input-error" : ""}`}
+                className={`form-control date-input ${errors.dateRange ? "input-error" : ""}`}
               />
             </div>
 
@@ -210,9 +303,10 @@ const Reports = () => {
               <input
                 type="date"
                 name="toDate"
+                 class="date-input"
                 value={filter.toDate}
                 onChange={handleFilterChange}
-                className={`form-control ${errors.dateRange ? "input-error" : ""}`}
+                className={`form-control date-input ${errors.dateRange ? "input-error" : ""}`}
               />
             </div>
 
@@ -231,9 +325,20 @@ const Reports = () => {
 
           {errors.dateRange && <div className="error-message">{errors.dateRange}</div>}
 
+          {/* Active filters display */}
+          {isFiltered && (
+            <div className="active-filters">
+              <span>Active Filters: </span>
+              <span className="filter-tags">{getActiveFiltersText()}</span>
+            </div>
+          )}
+
           <div className="form-actions">
             <button type="submit" className="btn-generate-report" disabled={loading}>
               <i className="fas fa-search"></i> Generate Report
+            </button>
+            <button type="button" onClick={clearFilters} className="btn-clear-filters" disabled={loading}>
+              <i className="fas fa-times"></i> Clear Filters
             </button>
           </div>
         </form>
@@ -268,8 +373,8 @@ const Reports = () => {
                 </tr>
               </thead>
               <tbody>
-                {report.map((row) => (
-                  <tr key={row.id}>
+                {report.map((row, index) => (
+                  <tr key={index}>
                     <td>{row.name}</td>
                     <td>{row.studentId}</td>
                     <td>Class {row.class}</td>

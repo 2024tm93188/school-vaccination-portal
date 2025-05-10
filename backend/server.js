@@ -10,6 +10,7 @@ const authRoutes = require("./routes/auth.routes");
 const studentRoutes = require("./routes/student.routes");
 const driveRoutes = require("./routes/drive.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
+const reportRoutes = require("./routes/report.routes");
 
 // Load environment variables
 dotenv.config();
@@ -60,6 +61,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/drives", driveRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reports", reportRoutes);
 
 // Basic route
 app.get("/", (req, res) => {

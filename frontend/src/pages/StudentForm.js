@@ -43,15 +43,6 @@ const StudentForm = () => {
                         })
                     } catch (apiError) {
                         console.error("API error:", apiError)
-                        // If API fails, use mock data for demo purposes
-                        setStudent({
-                            name: "John Doe",
-                            studentId: "STU001",
-                            class: "5",
-                            section: "A",
-                            age: "10",
-                            gender: "Male",
-                        })
                     }
                 } catch (err) {
                     toast.error("Failed to load student data")

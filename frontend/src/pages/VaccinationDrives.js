@@ -115,7 +115,7 @@ const VaccinationDrives = () => {
       </div>
 
       <div className="filters-container">
-        <div className="filter-controls">
+        <div className="filter-controls-drive">
           <div className="filter-group">
             <label>Status:</label>
             <select name="status" value={filter.status} onChange={handleFilterChange}>
@@ -123,7 +123,7 @@ const VaccinationDrives = () => {
               <option value="Scheduled">Scheduled</option>
               <option value="Completed">Completed</option>
               <option value="Cancelled">Cancelled</option>
-            </select>2
+            </select>
           </div>
 
           <div className="filter-group">

@@ -1,4 +1,3 @@
-
 const multer = require('multer');
 const path = require('path');
 
@@ -9,7 +8,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     cb(null, `${Date.now()}-${file.originalname}`);
-  }
+  },
 });
 
 // Check file type
@@ -25,7 +24,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max file size
-  fileFilter: fileFilter
+  fileFilter: fileFilter,
 });
 
 module.exports = upload;

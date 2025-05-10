@@ -1,6 +1,7 @@
 const express = require('express');
 const studentController = require('../controllers/student.controller');
 const router = express.Router();
+const upload = require('../middlewares/upload.middleware');
 
 /**
  * @swagger
@@ -124,5 +125,62 @@ router.put('/:id', studentController.updateStudent);
  *         description: Student not found
  */
 router.delete('/:id', studentController.deleteStudent);
+
+/**
+ * @swagger
+ * /students/{id}/vaccinate:
+ *   post:
+ *     summary: Mark student as vaccinated
+ *     tags: [Students]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Student ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               drive:
+ *                 type: string
+ *               vaccineName:
+ *                 type: string
+ *               dateAdministered:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       200:
+ *         description: Student Vaccinated successfully
+ *       404:
+ *         description: Student not found
+ */
+router.post('/:id/vaccinate', studentController.vaccinateStudent);
+
+/**
+ * @swagger
+ * /students/import:
+ *   post:
+ *     summary: Bulk import students via CSV
+ *     tags: [Students]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Students imported successfully
+ */
+router.post('/import', upload.single('file'), studentController.importStudents);
 
 module.exports = router;

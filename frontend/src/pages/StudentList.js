@@ -7,19 +7,7 @@ import { studentService } from "../services/api.service"
 import DeleteConfirmationModal from "../components/DeleteConfirmationModel"
 
 const StudentList = () => {
-  // Default hardcoded students as fallback
-  const defaultStudents = [
-    { id: 1, name: "John Doe", studentId: "STU001", class: "5", section: "A", vaccinated: true },
-    { id: 2, name: "Jane Smith", studentId: "STU002", class: "5", section: "B", vaccinated: false },
-    { id: 3, name: "Michael Johnson", studentId: "STU003", class: "6", section: "A", vaccinated: true },
-    { id: 4, name: "Emily Brown", studentId: "STU004", class: "6", section: "B", vaccinated: true },
-    { id: 5, name: "David Wilson", studentId: "STU005", class: "7", section: "A", vaccinated: false },
-    { id: 6, name: "Sarah Taylor", studentId: "STU006", class: "7", section: "B", vaccinated: true },
-    { id: 7, name: "James Anderson", studentId: "STU007", class: "8", section: "A", vaccinated: false },
-    { id: 8, name: "Olivia Thomas", studentId: "STU008", class: "8", section: "B", vaccinated: true },
-  ]
-
-  const [students, setStudents] = useState(defaultStudents)
+  const [students, setStudents] = useState()
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filter, setFilter] = useState({
@@ -67,28 +55,6 @@ const StudentList = () => {
         // Silently fall back to default data
         console.log("Using default student data")
 
-        // Filter the default data based on search and filters
-        const filteredDefaultStudents = defaultStudents.filter((student) => {
-          // Filter by search term
-          const matchesSearch =
-            student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
-
-          // Filter by class
-          const matchesClass = filter.class ? student.class === filter.class : true
-
-          // Filter by vaccination status
-          const matchesVaccinationStatus =
-            filter.vaccinationStatus === ""
-              ? true
-              : filter.vaccinationStatus === "vaccinated"
-                ? student.vaccinated
-                : !student.vaccinated
-
-          return matchesSearch && matchesClass && matchesVaccinationStatus
-        })
-
-        setStudents(filteredDefaultStudents)
       } finally {
         setLoading(false)
       }
@@ -161,7 +127,7 @@ const StudentList = () => {
         </div>
 
         <div className="filter-controls">
-          <div className="filter-group">
+          <div className="filter-group-student">
             <label>Class:</label>
             <select name="class" value={filter.class} onChange={handleFilterChange}>
               <option value="">All Classes</option>
@@ -172,7 +138,7 @@ const StudentList = () => {
             </select>
           </div>
 
-          <div className="filter-group">
+          <div className="filter-group-student">
             <label>Vaccination Status:</label>
             <select name="vaccinationStatus" value={filter.vaccinationStatus} onChange={handleFilterChange}>
               <option value="">All Statuses</option>
