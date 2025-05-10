@@ -4,11 +4,6 @@ const authMiddleware = (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "")
 
-    if (process.env.NODE_ENV === "development" && !token) {
-      req.user = { id: "development-user", role: "admin" }
-      return next()
-    }
-
     if (!token) {
       return res.status(401).json({ message: "No authentication token, access denied" })
     }

@@ -72,6 +72,8 @@ const upload = require('../middlewares/upload.middleware');
  *   get:
  *     summary: Retrieve a list of students
  *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: A list of students
@@ -84,6 +86,8 @@ router.get('/', studentController.getAllStudents);
  *   get:
  *     summary: Get a student by ID
  *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -105,6 +109,8 @@ router.get('/:id', studentController.getStudentById);
  *   post:
  *     summary: Create a new student
  *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -133,6 +139,8 @@ router.post('/', studentController.createStudent);
  *   put:
  *     summary: Update a student
  *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -167,6 +175,8 @@ router.put('/:id', studentController.updateStudent);
  *   delete:
  *     summary: Delete a student
  *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -188,6 +198,8 @@ router.delete('/:id', studentController.deleteStudent);
  *   post:
  *     summary: Mark student as vaccinated
  *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -223,6 +235,8 @@ router.post('/:id/vaccinate', studentController.vaccinateStudent);
  *   post:
  *     summary: Bulk import students via CSV
  *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

@@ -48,6 +48,8 @@ const router = express.Router();
  *   get:
  *     summary: Get all vaccination drives
  *     tags: [Vaccination Drives]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of vaccination drives
@@ -66,6 +68,8 @@ router.get('/', driveController.getAllDrives);
  *   get:
  *     summary: Get a vaccination drive by ID
  *     tags: [Vaccination Drives]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -88,6 +92,8 @@ router.get('/:id', driveController.getDriveById);
  *   post:
  *     summary: Create a new vaccination drive
  *     tags: [Vaccination Drives]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -106,6 +112,8 @@ router.post('/', driveController.createDrive);
  *   put:
  *     summary: Update a vaccination drive
  *     tags: [Vaccination Drives]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -130,6 +138,8 @@ router.put('/:id', driveController.updateDrive);
  *   delete:
  *     summary: Delete a vaccination drive
  *     tags: [Vaccination Drives]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -154,6 +164,8 @@ router.delete("/:id", driveController.deleteDrive)
  *   patch:
  *     summary: Cancel a vaccination drive
  *     tags: [Vaccination Drives]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -172,6 +184,8 @@ router.patch('/:id/cancel', driveController.cancelDrive);
  *   patch:
  *     summary: Mark a vaccination drive as completed
  *     tags: [Vaccination Drives]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -190,6 +204,8 @@ router.patch('/:id/complete', driveController.completeDrive);
  *   get:
  *     summary: Get students for a specific vaccination drive
  *     tags: [Vaccination Drives]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
