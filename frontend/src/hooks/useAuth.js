@@ -33,14 +33,14 @@ export const AuthProvider = ({ children }) => {
       // For development/testing, allow hardcoded credentials
       if (
         process.env.NODE_ENV === "development" &&
-        (username === "admin" || username === "coordinator") &&
+        (username === "admin") &&
         password === "password123"
       ) {
         const userData = {
-          id: username === "admin" ? "1" : "2",
+          id: username === "1",
           username,
           role: username,
-          name: username === "admin" ? "Admin User" : "Coordinator User",
+          name: username === "Admin User",
         }
 
         // Store user in localStorage

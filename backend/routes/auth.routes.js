@@ -1,6 +1,6 @@
-const express = require('express');
-const authController = require('../controllers/auth.controller');
-const router = express.Router();
+const express = require("express")
+const authController = require("../controllers/auth.controller")
+const router = express.Router()
 
 /**
  * @swagger
@@ -35,37 +35,6 @@ const router = express.Router();
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', authController.login);
+router.post("/login", authController.login)
 
-/**
- * @swagger
- * /auth/register:
- *   post:
- *     summary: Register a new user
- *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - username
- *               - password
- *               - role
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *               role:
- *                 type: string
- *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: Bad request
- */
-router.post('/register', authController.register);
-
-module.exports = router;
+module.exports = router

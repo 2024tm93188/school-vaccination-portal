@@ -14,7 +14,6 @@ const Login = () => {
   const { login, isAuthenticated } = useAuth()
 
   useEffect(() => {
-    // If user is already authenticated, redirect to dashboard
     if (isAuthenticated) {
       navigate("/")
     }
@@ -84,7 +83,7 @@ const Login = () => {
         <div className="demo-credentials">
           <p>Demo Credentials:</p>
           <p>
-            <strong>Coordinator:</strong> username: coordinator, password: password123
+            <strong>Coordinator:</strong> username: admin, password: password123
           </p>
         </div>
       </div>

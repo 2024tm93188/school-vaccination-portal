@@ -12,7 +12,63 @@ const upload = require('../middlewares/upload.middleware');
 
 /**
  * @swagger
- * /students:
+ * components:
+ *   schemas:
+ *     Student:
+ *       type: object
+ *       required:
+ *         - name
+ *         - studentId
+ *         - class
+ *         - section
+ *         - age
+ *         - gender
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Full name of the student
+ *         studentId:
+ *           type: string
+ *           description: Unique identifier for the student
+ *         class:
+ *           type: string
+ *           description: Class the student belongs to
+ *         section:
+ *           type: string
+ *           description: Section within the class
+ *         age:
+ *           type: integer
+ *           description: Age of the student
+ *         gender:
+ *           type: string
+ *           enum: [Male, Female, Other]
+ *           description: Gender of the student
+ *         vaccinations:
+ *           type: array
+ *           description: List of vaccination records
+ *           items:
+ *             type: object
+ *             properties:
+ *               drive:
+ *                 type: string
+ *                 description: ObjectId reference to the vaccination drive
+ *               vaccineName:
+ *                 type: string
+ *                 description: Name of the vaccine
+ *               dateAdministered:
+ *                 type: string
+ *                 format: date
+ *                 description: Date when the vaccine was administered
+ *               status:
+ *                 type: string
+ *                 enum: [Scheduled, Completed, Missed]
+ *                 description: Vaccination status
+ */
+
+
+/**
+ * @swagger
+ * /api/students:
  *   get:
  *     summary: Retrieve a list of students
  *     tags: [Students]
@@ -24,7 +80,7 @@ router.get('/', studentController.getAllStudents);
 
 /**
  * @swagger
- * /students/{id}:
+ * /api/students/{id}:
  *   get:
  *     summary: Get a student by ID
  *     tags: [Students]
@@ -45,7 +101,7 @@ router.get('/:id', studentController.getStudentById);
 
 /**
  * @swagger
- * /students:
+ * /api/students:
  *   post:
  *     summary: Create a new student
  *     tags: [Students]
@@ -73,7 +129,7 @@ router.post('/', studentController.createStudent);
 
 /**
  * @swagger
- * /students/{id}:
+ * /api/students/{id}:
  *   put:
  *     summary: Update a student
  *     tags: [Students]
@@ -107,7 +163,7 @@ router.put('/:id', studentController.updateStudent);
 
 /**
  * @swagger
- * /students/{id}:
+ * /api/students/{id}:
  *   delete:
  *     summary: Delete a student
  *     tags: [Students]
@@ -128,7 +184,7 @@ router.delete('/:id', studentController.deleteStudent);
 
 /**
  * @swagger
- * /students/{id}/vaccinate:
+ * /api/students/{id}/vaccinate:
  *   post:
  *     summary: Mark student as vaccinated
  *     tags: [Students]
@@ -163,7 +219,7 @@ router.post('/:id/vaccinate', studentController.vaccinateStudent);
 
 /**
  * @swagger
- * /students/import:
+ * /api/students/import:
  *   post:
  *     summary: Bulk import students via CSV
  *     tags: [Students]

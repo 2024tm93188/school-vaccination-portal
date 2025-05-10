@@ -1,5 +1,6 @@
 const express = require('express');
 const dashboardController = require('../controllers/dashboard.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 const router = express.Router();
 
 /**
@@ -11,10 +12,12 @@ const router = express.Router();
 
 /**
  * @swagger
- * /dashboard:
+ * /api/dashboard:
  *   get:
  *     summary: Get dashboard statistics
  *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Dashboard statistics data
