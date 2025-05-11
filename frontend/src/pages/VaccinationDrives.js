@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import { driveService } from "../services/api.service"
 import Spinner from "../components/Spinner"
-import DeleteConfirmationModal from "../components/DeleteConfirmationModel"
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal.js"
 
 const VaccinationDrives = () => {
   const [drives, setDrives] = useState([])

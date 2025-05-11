@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import { studentService } from "../services/api.service"
-import DeleteConfirmationModal from "../components/DeleteConfirmationModel"
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal.js"
 
 const StudentList = () => {
   const [students, setStudents] = useState()
