@@ -23,7 +23,7 @@ const Layout = ({ children }) => {
           <h1>School Vaccination Portal</h1>
           {user && (
             <div className="user-info">
-              <span>Welcome, {user.name}</span>
+              <span>Welcome, Admin</span>
               <button onClick={handleLogout} className="logout-btn">
                 Logout
               </button>

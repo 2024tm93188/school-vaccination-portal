@@ -108,9 +108,8 @@ router.get('/:id', studentController.getStudentById);
  * /api/students:
  *   post:
  *     summary: Create a new student
- *     tags: [Students]
- *     security:
- *       - bearerAuth: []
+ *     tags:
+ *       - Students
  *     requestBody:
  *       required: true
  *       content:
@@ -119,17 +118,57 @@ router.get('/:id', studentController.getStudentById);
  *             type: object
  *             required:
  *               - name
+ *               - studentId
  *               - class
+ *               - section
+ *               - age
+ *               - gender
  *             properties:
  *               name:
  *                 type: string
+ *               studentId:
+ *                 type: string
  *               class:
  *                 type: string
+ *               section:
+ *                 type: string
+ *               age:
+ *                 type: integer
+ *               gender:
+ *                 type: string
+ *                 enum: [Male, Female]
  *     responses:
  *       201:
  *         description: Student created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Student created successfully
+ *                 student:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     studentId:
+ *                       type: string
+ *                     class:
+ *                       type: string
+ *                     section:
+ *                       type: string
+ *                     age:
+ *                       type: integer
+ *                     gender:
+ *                       type: string
  *       400:
- *         description: Bad request
+ *         description: Bad request, invalid or missing fields
+ *       500:
+ *         description: Internal server error
  */
 router.post('/', studentController.createStudent);
 
@@ -137,15 +176,14 @@ router.post('/', studentController.createStudent);
  * @swagger
  * /api/students/{id}:
  *   put:
- *     summary: Update a student
- *     tags: [Students]
- *     security:
- *       - bearerAuth: []
+ *     summary: Update a student by ID
+ *     tags:
+ *       - Students
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Student ID
+ *         description: MongoDB ObjectId of the student to update
  *         schema:
  *           type: string
  *     requestBody:
@@ -157,15 +195,36 @@ router.post('/', studentController.createStudent);
  *             properties:
  *               name:
  *                 type: string
+ *               studentId:
+ *                 type: string
  *               class:
  *                 type: string
+ *               section:
+ *                 type: string
+ *               age:
+ *                 type: integer
+ *               gender:
+ *                 type: string
+ *                 enum: [Male, Female]
  *     responses:
  *       200:
  *         description: Student updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Student updated successfully
+ *                 student:
+ *                   $ref: '#/components/schemas/Student'
  *       400:
- *         description: Bad request
+ *         description: Invalid request data
  *       404:
  *         description: Student not found
+ *       500:
+ *         description: Internal server error
  */
 router.put('/:id', studentController.updateStudent);
 

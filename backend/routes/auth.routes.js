@@ -52,7 +52,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /auth/login:
+ * /api/login:
  *   post:
  *     summary: Log in a user
  *     tags: [Authentication]
